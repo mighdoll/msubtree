@@ -1,76 +1,71 @@
-git msubtree extends git subtree to support --rebase, so you can have a clean linear history for your monorepo.
+`git msubtree` extends `git subtree` to support --rebase, so you can have a clean linear history for your monorepo.
 
-```
-*   c86f090 Split 'pkg/sub/' into c..
-|\  
-| * 2e63d7e modify 2 from main       
-* | 581eadc modify 2 from main       
-* | bfa05c7 Merge commit '59e898a75..
-|\| 
-| * 59e898a modify 1 from sub        
-* | 0be8862 Merge commit '3dde001e1..
-|\| 
-| * 3dde001 modify 0 from sub        
-* | 56c3d54 Add 'pkg/sub/' from com..
-|\| 
-| * e872c06 initial commit sub       
-* e4e00d4 initial commit main
-```
+<style type="text/css" rel="stylesheet">
+.no_bullets li { list-style: none; }
+table.comparison td { 
+  vertical-align: top;
+  padding-right: 80px;
+}
+</style>
 
-```
-* 2675b5f rebase push from pkg/sub 
-* 16c0aef modify 2 from main       
-* 1cc97dd rebase pull into pkg/sub 
-* c04d9c6 modify 1 from sub        
-* 27db782 rebase pull into pkg/sub 
-* b930cee modify 0 from sub        
-* 2f82a7a Add 'pkg/sub/' from com..
-* 3371498 initial commit main
-```
+<table class="comparison">
+  <tr>
+    <th> --rebase </th>
+    <th> (default merge) </th>
+  </tr>
+  <tr>
+    <td>
+      <img width="253" alt="image" src="https://user-images.githubusercontent.com/63816/216488819-70c1048a-5e51-4e82-9e08-6b264a90fb90.png">
+    </td>
+    <td class="vertical">
+      <img width="251" alt="image" src="https://user-images.githubusercontent.com/63816/216487027-93c2d5ae-155a-433b-a9d8-ea4f710eb9ca.png">
+    </td>
+  </tr>
+</table>
 
-git-subtree is one of the best ways to support a monorepo with git:
+
+`git msubtree` is nice way to support a monorepo:
 
 - Users of the main repository and the subproject see their projects as
-  normal git projects. (Users of the main repository see the entire project as monolithic,
-  the subproject is just a directory.)
+  normal git projects. (Users of the main repository see the entire project as monolithic.
+  The subproject is just a directory.)
 - You can transfer commits to and from external subproject repositories via subtree pull and push
   commands. Specially formatted git commit comments in the main repository mark the
   transfers.
 
-`git msubtree` works like subtree, but adds the --rebase option to the commands add, pull and push.
 
 ## Install
 
 Add this directory to your `$PATH`.
 Then simply use `git msubtree` in place of `git subtree` to enable the new features.
 
-## Example Use
+`git msubtree` is like `git subtree`, but adds the `--rebase` option to the `msubtree` commands `add`, `pull` and `push`.
 
-### add
+## Example Commands
+
+add a new sub-repository into your monorepo:
 
 ```sh
 git msubtree add --rebase --prefix=pkg/sub subrepo main
 ```
 
-### push
+push changes from your monorepo to the sub-repository:
 
 ```sh
 git msubtree push --rebase --prefix=pkg/sub subrepo main
 ```
 
-### pull
+pull changes from the sub-repository:
 
 ```sh
 git msubtree pull --rebase --prefix=pkg/sub subrepo main
 ```
 
-<style type="text/css" rel="stylesheet">
-.no_bullets li { list-style: none; }
-</style>
 
 <div class="no_bullets">
 
-- ### fixing conflicts
+- ### Fixing Conflicts
+
   - Fix the files, and `git rebase --continue` until there are no more conflicts:
 
     ```sh
@@ -85,8 +80,8 @@ git msubtree pull --rebase --prefix=pkg/sub subrepo main
     git msubtree pull --rebase --continue --prefix=pkg/sub subrepo main
     ```
 
-- ### aborting conflicts
-  * You can abandon the conflicted pull with:
+- ### Aborting Conflicts
+  - You can abandon the conflicted pull with:
     ```sh
     git msubtree pull --rebase --abort --prefix=pkg/sub subrepo main
     ```
@@ -94,7 +89,7 @@ git msubtree pull --rebase --prefix=pkg/sub subrepo main
 
 </div>
 
-## How it works
+## How it Works
 
 `msubtree` can translate commits between the subtree repository and main repo.
 Once translated, commits can be pulled or pushed between the two repositories.
@@ -105,13 +100,16 @@ commit in the main repository with a formatted comment describing this 'sync poi
 the hashes of the most recent pair of commits from the main and subtree repositories
 referencing the identical subtree directory content.
 
-The sync point is used for future operations to reduce unnecessary conflicts, and to optimize 
+The sync point is used for future operations to reduce unnecessary conflicts, and to optimize
 unnecessary scanning.
 
 If files have been edited in both repositories, the sync point may not be the most recent commit
 in the main or subtree repositories, but `msubtree` will search for the most recent sync
 point it can find.
 
+`git-msubtree` is an extended version of the `git-subtree` script. 
+The original merge based approach is used if `--rebase` is not specified.
+
 ## To Do
-* implement `pull --abort` 
-* support `--squash` with `pull --rebase`.  (`add --rebase` squashes by default.)
+- implement `pull --abort`
+- support `--squash` with `pull --rebase`. 
