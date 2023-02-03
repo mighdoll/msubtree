@@ -1112,19 +1112,21 @@ cmd_pull () {
 	fi
 	repository="$1"
 	ref="$2"
+
 	if test -n "$arg_continue"
 	then 
 		merge_rebased_subtree
-	else
-		ensure_clean
-		ensure_valid_ref_format "$ref"
-		git fetch "$repository" "$ref" || exit $?
-		if test -n "$arg_rebase"
-		then
-			cmd_rebase_pull FETCH_HEAD "$repository"
-		else 
-			cmd_merge FETCH_HEAD "$repository"
-		fi
+		return
+	fi
+
+	ensure_clean
+	ensure_valid_ref_format "$ref"
+	git fetch "$repository" "$ref" || exit $?
+	if test -n "$arg_rebase"
+	then
+		cmd_rebase_pull FETCH_HEAD "$repository"
+	else 
+		cmd_merge FETCH_HEAD "$repository"
 	fi
 }
 
