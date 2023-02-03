@@ -1,28 +1,6 @@
 `git msubtree` extends `git subtree` to support --rebase, so you can have a clean linear history for your monorepo.
 
-<style type="text/css" rel="stylesheet">
-.no_bullets li { list-style: none; }
-table.comparison td { 
-  vertical-align: top;
-  padding-right: 80px;
-}
-</style>
-
-<table class="comparison">
-  <tr>
-    <th> --rebase </th>
-    <th> (default merge) </th>
-  </tr>
-  <tr>
-    <td>
-      <img width="253" alt="image" src="https://user-images.githubusercontent.com/63816/216488819-70c1048a-5e51-4e82-9e08-6b264a90fb90.png">
-    </td>
-    <td class="vertical">
-      <img width="251" alt="image" src="https://user-images.githubusercontent.com/63816/216487027-93c2d5ae-155a-433b-a9d8-ea4f710eb9ca.png">
-    </td>
-  </tr>
-</table>
-
+<img width="882" alt="image" src="https://user-images.githubusercontent.com/63816/216511723-7c5bbe89-6503-451d-b1a9-4f4863077a2c.png">
 
 `git msubtree` is nice way to support a monorepo:
 
@@ -62,8 +40,6 @@ git msubtree pull --rebase --prefix=pkg/sub subrepo main
 ```
 
 
-<div class="no_bullets">
-
 - ### Fixing Conflicts
 
   - Fix the files, and `git rebase --continue` until there are no more conflicts:
@@ -87,7 +63,6 @@ git msubtree pull --rebase --prefix=pkg/sub subrepo main
     ```
     this will also do a git rebase --abort
 
-</div>
 
 ## How it Works
 
