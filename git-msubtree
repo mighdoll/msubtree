@@ -177,6 +177,7 @@ main () {
 	arg_addmerge_message=
 	arg_rebase=
 	arg_continue=
+	arg_abort=
 	while test $# -gt 0
 	do
 		opt="$1"
@@ -238,6 +239,9 @@ main () {
 			test -n "$allow_split" || die_incompatible_opt "$opt" "$arg_command"
 			arg_split_ignore_joins=
 			;;
+		--abort)
+			arg_abort=1
+			;;
 		--continue)
 			arg_continue=1
 			;;
@@ -261,6 +265,11 @@ main () {
 		esac
 	done
 	shift
+
+	if test $arg_command = "pull" -a -n "$arg_abort"
+	then
+		rebase_pull_abort
+	fi
 
 	if test -z "$arg_prefix"
 	then
@@ -1260,7 +1269,20 @@ cmd_rebase_pull () {
 	merge_rebased_subtree
 }
 
-# after the pull --rebase is complete (possibly after a --continue)
+# Abandon the subtree pull and abort the rebase
+rebase_pull_abort () {
+	assert test $# = 0
+	mainline=$(git symbolic-ref -q SUBTREE_MAINLINE) 
+	clear_subtree_refs 
+	git rebase --abort || exit $?
+
+	if test -n $mainline
+	then
+		git checkout -q $mainline
+	fi
+}
+
+# After the pull --rebase is complete (possibly after a --continue)
 # . advance the mainline with the now rebased commits
 # . and cleanup the subtree refs
 merge_rebased_subtree () {
@@ -1293,8 +1315,8 @@ merge_rebased_subtree () {
 #
 clear_subtree_refs () {
 	assert test $# = 0
-	git symbolic-ref -d SUBTREE_MAINLINE
-	git symbolic-ref -d SUBTREE_HEAD
+	git symbolic-ref -d SUBTREE_MAINLINE > /dev/null 2>&1
+	git symbolic-ref -d SUBTREE_HEAD > /dev/null 2>&1
 }
 
 # Return a command line option to git commit-tree for the subtree parent commit

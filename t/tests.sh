@@ -14,6 +14,7 @@ run_all_tests () {
   run_test "add"
   run_test "simple_pull"
   run_test "pull_continue"
+  run_test "pull_abort"
   run_test "simple_push"
   run_test "push_after_continue"
 }
@@ -48,13 +49,30 @@ test_simple_push () {
   make_repos
   modify_main
   msubtree_push
+
   cd sub
   git checkout -q main
   verify_equal "$(last_commit_subject 0)" "modify 0 from main"  
   git checkout -q foo
   cd ..
+
   cd main
   verify_equal "$(last_commit_subject 0)" "rebase push from pkg/sub"  
+  cd ..
+}
+
+# verify that pull --abort works after a conflict
+test_pull_abort () {
+  make_repos
+  modify_main
+  modify_sub
+  msubtree_pull 
+  msubtree_pull_abort 
+
+  cd main
+  verify_equal "$(last_commit_subject 0)" "modify 0 from main"  
+  rebasing=$(git rev-parse -q --verify REBASE_HEAD)
+  verify_equal "$rebasing" ""
   cd ..
 }
 
@@ -146,6 +164,13 @@ msubtree_pull_continue () {
   git msubtree pull --continue --prefix=pkg/sub ../sub main
   cd ..
 }
+
+msubtree_pull_abort () {
+  cd main
+  git msubtree pull --abort 
+  cd ..
+}
+
 
 #
 # --- test setup --
