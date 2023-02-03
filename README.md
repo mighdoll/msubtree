@@ -86,5 +86,6 @@ point it can find.
 The original merge based approach is used if `--rebase` is not specified.
 
 ## To Do
-- implement `pull --abort`
 - support `--squash` with `pull --rebase`. 
+- support `--annotate` with `pull --rebase`?
+- more testing
