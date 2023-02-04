@@ -1357,22 +1357,22 @@ find_sync_point() {
 	if (test -n "$parsed")
 	then
 		set $parsed
-		latest_sync=$1
-		stop_at_sync=^$2
-		cache_recent_trees $latest_sync
+		sync_main=$1
+		sub_stop=^$2
+		cache_recent_trees $sync_main
 	else
-		stop_at_sync=
+		sub_stop=
 	fi
-	# check each subtree commits tree hash against that cache
-	# return the subtree commit and the mainline commit
-	git rev-list $pulled_head $stop_at_sync | 
+	# check each subtree commit tree hash against the cache to find matching mainline commit
+	# return via stdout the mainline commit and subtree commit 
+	git rev-list $pulled_head $sub_stop| 
 	while read rev
 	do
 		sub_tree=$(toptree_for_commit $rev)
 		found=$(cache_get $sub_tree)
 		if (test -n "$found")
 		then
-			# debug "found matching tree $sub_tree for $rev <-> $found"
+			# debug "found matching tree $sub_tree for $found <-> $rev"
 			echo $found $rev
 			break
 		fi
