@@ -1422,13 +1422,13 @@ parse_sync () {
 # (This is used to search for a sync point)
 cache_recent_trees () {
 	assert test $# = 1
-	latest_sync=$1
+	sync_main=$1
 	local stop_at_sync=""
-	if test -n latest
+	if test -n sync_main
 	then
-		stop_at_sync=^$latest_sync
+		stop_at_sync=^$sync_main
 	fi
-	git rev-list $stop_at_sync HEAD -- "$dir" |
+	git rev-list HEAD $stop_at_sync -- "$dir" |
 	while read rev 
 	do
 		tree=$(subtree_for_commit $rev "$dir")
