@@ -269,6 +269,7 @@ main () {
 	if test $arg_command = "pull" -a -n "$arg_abort"
 	then
 		rebase_pull_abort
+		exit $?	
 	fi
 
 	if test -z "$arg_prefix"
