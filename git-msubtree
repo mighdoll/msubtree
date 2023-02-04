@@ -1179,7 +1179,7 @@ cmd_push () {
 }
 
 ##
-## 		script exteions to handle --rebase 
+## 		script extensions to handle --rebase 
 ##
 ## The rebase variants of git-subtree commands maintain a linear history 
 ## in the mainline. 
