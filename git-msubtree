@@ -1275,7 +1275,11 @@ rebase_pull_abort () {
 	assert test $# = 0
 	mainline=$(git symbolic-ref -q SUBTREE_MAINLINE) 
 	clear_subtree_refs 
-	git rebase --abort || exit $?
+	rebasing=$(git rev-parse -q --verify REBASE_HEAD)
+	if test -n "$rebasing"
+	then
+		git rebase --abort 
+	fi
 
 	if test -n $mainline
 	then
