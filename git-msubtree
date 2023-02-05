@@ -32,6 +32,7 @@ git subtree merge --prefix=<prefix> <commit>
 git subtree split --prefix=<prefix> [<commit>]
 git subtree pull  --prefix=<prefix> <repository> <ref>
 git subtree push  --prefix=<prefix> <repository> <refspec>
+git subtree sync  --prefix=<prefix> <refspec>
 --
 h,help        show the help
 q             quiet
@@ -157,6 +158,8 @@ main () {
 	split|push)
 		allow_split=1
 		allow_addmerge=$arg_split_rejoin
+		;;
+	sync)
 		;;
 	*)
 		die "fatal: unknown command '$arg_command'"
@@ -1172,7 +1175,7 @@ cmd_push () {
 		if test -n "$arg_rebase"
 		then
 			echo "localrev: $localrev"
-			commit_sync "rebase push from $dir" $localrev
+			commit_sync "rebase push from $dir" $localrev HEAD
 		fi
 	else
 		die "fatal: '$dir' must already exist. Try 'git subtree add'."
@@ -1287,28 +1290,40 @@ rebase_pull_abort () {
 	fi
 }
 
+# Commit a new sync point to the mainline by searching
+# for a recent pair of commits where the subtree line and 
+# mainline have the same contents for the subtree directory. 
+cmd_sync () {
+	subtree_head=$(git rev-parse --verify $1)
+
+	cache_setup || exit $?
+
+	matching_commits=$(find_sync_point $subtree_head)
+	if test -z "$matching_commits"
+	then
+		debug "no matching mainline commit found to match subtree prior: $subtree_head"
+	else 
+		set $matching_commits
+		main_commit=$1
+		subtree_commit=$2
+		debug "sync found: main_commit: $main_commit, subtree_commit: $subtree_commit"
+		commit_sync "rebase pull into $dir" $subtree_head $main_commit
+	fi
+
+}
+
 # After the pull --rebase is complete (possibly after a --continue)
 # . advance the mainline with the now rebased commits
 # . and cleanup the subtree refs
 merge_rebased_subtree () {
 	assert test $# = 0
-	cache_setup || exit $?
 	mainline=$(git symbolic-ref -q SUBTREE_MAINLINE) || exit $?
 	subtree_head=$(git symbolic-ref -q SUBTREE_HEAD) || exit $?
 	head=$(git rev-parse -q HEAD) || exit $?
 	git checkout -q $mainline || exit $?
 	git merge --ff-only -q $head || exit $?
-	matching_commits=$(find_sync_point $subtree_head)
-	if test -z "$matching_commits"
-	then
-		debug "skipping commit sync at $head, no matching tree found"
-	else 
-		set $matching_commits
-		subtree_commit=$1
-		main_commit=$2
-		# TODO add an option to take the main commit in commit_sync
-		commit_sync "rebase pull into $dir" $subtree_head
-	fi
+
+	cmd_sync $subtree_head 
 	clear_subtree_refs
 }
 
@@ -1448,10 +1463,12 @@ cache_recent_trees () {
 
 # Commit a new sync marker 
 commit_sync () {
-	assert test $# = 2
+	assert test $# = 3
 	msg="$1"
 	subtree_head="$2"
-	mainline=$(git rev-parse -q HEAD) || exit $?
+	main_rev="$3"
+
+	mainline=$(git rev-parse -q $main_rev) || exit $?
 	subtree_toptree=$(toptree_for_commit $subtree_head)
 	main_subtree=$(subtree_for_commit $mainline "$dir")
 	
