@@ -1379,14 +1379,14 @@ find_sync_point() {
 	done
 }
 
-# Find and parse the most recent subtree sync marker commit
+# Find and parse the most recent subtree sync marker commit in mainline
 # Returns (via stdout): 
 # 	the aligned mainline and subtree commits, and the sync marker commit
 #   or nothing if the sync marker commit is not found or not parseable
 parse_latest_sync () {
 	assert test $# = 0
 	latest_sync=$(git rev-list --grep="^git-subtree-dir: $dir/*\$" \
-		--max-count=1 --remove-empty HEAD -- "$dir")
+		--max-count=1 --remove-empty HEAD)
 	if test -n "$latest_sync"
 	then
 		main_sub=$(parse_sync $latest_sync)
