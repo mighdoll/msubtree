@@ -1,0 +1,5 @@
+# vi temp files
+*.swp
+
+# test output directory
+temp/
