@@ -1171,7 +1171,7 @@ cmd_push () {
 		else 
 			localrev=$(cmd_split "$localrev_presplit" "$repository") || die
 		fi
-		git push "$repository" "$localrev":"refs/heads/$remoteref"
+		git push "$repository" "$localrev":"refs/heads/$remoteref" || die
 		if test -n "$arg_rebase"
 		then
 			echo "localrev: $localrev"
