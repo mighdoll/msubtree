@@ -1294,8 +1294,29 @@ rebase_pull_abort () {
 # for a recent pair of commits where the subtree line and 
 # mainline have the same contents for the subtree directory. 
 cmd_sync () {
-	subtree_head=$(git rev-parse --verify $1)
+	if test $# -ne 2 -a $# -ne 3
+	then
+		die "fatal: you must provide <repository> <refspec>"
+	fi
+	repository=$1
+	ref=$2
 
+	git fetch $repository $ref || exit $?
+
+	if test $# = 3
+	then
+		subtree_head=$(git rev-parse -q --verify $3)
+	else
+		subtree_head=$(git rev-parse -q --verify FETCH_HEAD)
+	fi
+
+	commit_recent_sync $subtree_head
+}
+
+# Find sync point to the and commit a sync marker commit to mainline 
+commit_recent_sync () {
+	assert test $# = 1
+	subtree_head=$1
 	cache_setup || exit $?
 
 	matching_commits=$(find_sync_point $subtree_head)
@@ -1306,10 +1327,9 @@ cmd_sync () {
 		set $matching_commits
 		main_commit=$1
 		subtree_commit=$2
-		debug "sync found: main_commit: $main_commit, subtree_commit: $subtree_commit"
-		commit_sync "rebase pull into $dir" $subtree_head $main_commit
+		debug "sync found: main_commit: $(short $main_commit), subtree_commit: $(short $subtree_commit)"
+		commit_sync "rebase pull into $dir" $subtree_commit $main_commit
 	fi
-
 }
 
 # After the pull --rebase is complete (possibly after a --continue)
@@ -1323,7 +1343,7 @@ merge_rebased_subtree () {
 	git checkout -q $mainline || exit $?
 	git merge --ff-only -q $head || exit $?
 
-	cmd_sync $subtree_head 
+	commit_recent_sync $subtree_head 
 	clear_subtree_refs
 }
 
