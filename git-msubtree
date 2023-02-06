@@ -1387,11 +1387,17 @@ find_sync_point() {
 		found=$(cache_get $sub_tree)
 		if (test -n "$found")
 		then
-			# debug "found matching tree $sub_tree for $found <-> $rev"
+			# debug "found matching tree $(short $sub_tree) for $(short $found) <-> $(short $rev)"
 			echo $found $rev
 			break
 		fi
 	done
+}
+
+# For debug, show a shortened hash
+short () {
+	assert test $# = 1
+	git rev-parse --short $1
 }
 
 # Find and parse the most recent subtree sync marker commit in mainline
