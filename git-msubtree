@@ -32,7 +32,7 @@ git subtree merge --prefix=<prefix> <commit>
 git subtree split --prefix=<prefix> [<commit>]
 git subtree pull  --prefix=<prefix> <repository> <ref>
 git subtree push  --prefix=<prefix> <repository> <refspec>
-git subtree sync  --prefix=<prefix> <refspec>
+git subtree sync  --prefix=<prefix> <repository> <refspec>
 --
 h,help        show the help
 q             quiet
