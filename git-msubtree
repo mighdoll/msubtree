@@ -1171,11 +1171,17 @@ cmd_push () {
 		else 
 			localrev=$(cmd_split "$localrev_presplit" "$repository") || die
 		fi
-		git push "$repository" "$localrev":"refs/heads/$remoteref" || die
-		if test -n "$arg_rebase"
+		if test -n "$localrev"
 		then
-			echo "localrev: $localrev"
-			commit_sync "rebase push from $dir" $localrev HEAD
+			git push "$repository" "$localrev":"refs/heads/$remoteref" || die
+			if test -n "$arg_rebase"
+			then
+				echo "localrev: $localrev"
+				commit_sync "rebase push from $dir" $localrev HEAD
+			fi
+		else
+			presplit_short=$(git rev-parse --short $localrev_presplit)
+			say >&2 "Subtree repository $repository $refspec is already up to date with local commit $presplit_short."
 		fi
 	else
 		die "fatal: '$dir' must already exist. Try 'git subtree add'."
